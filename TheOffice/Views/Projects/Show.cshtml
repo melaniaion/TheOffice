@@ -1,17 +1,112 @@
 ﻿@model TheOffice.Models.Project
+@using Task = TheOffice.Models.Task
 
-@if (ViewBag.Message != null)
-{
-    <h2 class="alert-success">@ViewBag.Message</h2>
-}
-<br />
+<!DOCTYPE>
+<html>
+<head>
+    <link rel="stylesheet" href="~/css/ProjectsShow.css" asp-append-version="true" />
 
-<h2>@Model.Title</h2><br />
-<h4>@Model.Description</h4><br />
+    <script>
+        
+            function allowDrop(event){
+                event.preventDefault();
+            }
 
-<h3>Membrii echipei</h3><br />
-@foreach (ApplicationUser member in ViewBag.Members){
-    <h4>@member.Email</h4> <br />
-}
+            function drag(event){
+                event.dataTransfer.setData("div", event.target.id);
+            }
 
-<a href="/Projects/EditMembers/@Model.Id" class="btn btn-outline-warning m-2">Edit Members</a>
+            function drop(event){
+                event.preventDefault();
+                var data = event.dataTransfer.getData("div");
+                event.target.appendChild(document.getElementById(data));
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Projects/AssignTask",
+                    dataType:"json",
+                    data: { itemId: data,
+                            parentId: event.target.id},
+
+                    succes: function(result){
+                        alert(result.message)
+                    },
+                    error:function(result){
+                        alert("Error")
+                    }  
+                }); 
+            }
+       
+    </script>
+</head>
+<body>
+    @if (ViewBag.Message != null)
+    {
+        <h2 class="alert-success">@ViewBag.Message</h2>
+    }
+    @if (ViewBag.Message_task != null)
+    {
+        <h2 class="alert-success">@ViewBag.Message_task</h2>
+    }
+    <br />
+
+        <div class="container" style="width:100%">
+            <img class="photo" src="@Model.Photo" />
+
+            <h2 class="title">@Model.Title</h2><br />
+        </div>
+        <div style="margin-top:10px;">
+            @if (ViewBag.isAdmin == true || ViewBag.isOrganizator == true)
+            {
+                <a href="/Projects/Edit/@Model.Id" class="btn btn-outline-warning m-2">Edit</a>
+                <a href="/Projects/Delete/@Model.Id" class="btn btn-outline-danger m-2">Delete</a>
+                <a href="/Tasks/New?project=@Model.Id" class="btn btn-outline-primary m-2">Add Tasks</a>
+                <a href="/Projects/EditMembers/@Model.Id" class="btn btn-outline-warning m-2">Edit Members</a>
+            }
+        </div>
+        <br />
+        <h3 id="members" style="left:5%;">Despre ce este vorba?</h3>
+        <br />
+
+        <h4 class="content">@Model.Description</h4>
+        <br />
+        <h3 id="members" style="left:5%;">Membrii echipei</h3><br />
+    
+        <br />
+        <div class="d-inline-flex justify-content-center">
+
+            @foreach (ApplicationUser member in ViewBag.Members)
+            {
+            <div class="member" id="@member.Id" ondrop="drop(event)" ondragover="allowDrop(event)" class="card m-4" style="width: 18rem;">
+
+                    <h4>@member.Email</h4>
+
+                <div class="d-block-flex" id="@member.Id">
+                        @foreach (Task task in member.Tasks)
+                        {
+                            <partial name="TaskCard" model="task"></partial>
+                        }
+                        <br />
+                    </div>
+
+               </div>
+            }
+            <div id="neatribuit"  style="width: 18rem; ">
+                <h4>Taskuri neatribuite</h4>
+
+                <div class="d-block-flex" id="neatribuit">
+                        @foreach (Task task in ViewBag.Tasks)
+                        {
+                            <partial name="TaskCard" model="task"></partial>
+                        }
+                        <br />
+                    </div>
+                </div>
+        
+        </div>
+        <br />
+
+        <br />
+        
+</body>
+</html>

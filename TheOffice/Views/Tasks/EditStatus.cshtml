@@ -1,0 +1,34 @@
+﻿@model TheOffice.Models.Task
+@if (ViewBag.Msg != null)
+{
+    <h2 class=" alert-danger">@ViewBag.Msg</h2>
+}
+<h2 class="text-center mt-5">Here you can edit the status</h2>
+<br />
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-3">
+
+            @using (Html.BeginForm(actionName: "EditStatus", controllerName: "Tasks",
+            method: FormMethod.Post,
+            routeValues: new { id = Model.Id }))
+            {
+                <label>Please select a status</label>
+                @Html.DropDownListFor(m => m.StatusId, new SelectList(Model.Stat, "Value", "Text"),
+            "Please select a status", new { @class = "form-control" })
+
+                @Html.ValidationMessageFor(m => m.StatusId, null, new { @class = "text-danger" })
+                <br />
+
+                <br />
+
+                <button class="btn btn-outline-info m-2" type="submit">Edit status</button>
+
+            }
+        </div>
+    </div>
+</div>
+
+
+
+

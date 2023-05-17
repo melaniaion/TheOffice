@@ -1,0 +1,204 @@
+﻿@model TheOffice.Models.Task
+<style>
+ .titluTask{
+        text-decoration: overline;
+        text-decoration-color:  #D3756B;
+        text-align: center;
+        font-size: 30px;
+        font-style: italic;
+
+ }
+ .flex-container {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+
+ .flex-container > div {
+        text-align: center;
+        font-size: 18px;
+        text-decoration: underline;
+        text-decoration-color: darkred;
+}
+
+.flex-container2 {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+}
+
+.flex-container2 > div {
+            border-left: 6px solid #D3756B;
+            text-align: center;
+            font-size: 14px;
+            border-radius: 10px;
+            padding: 5px;
+}
+.contentTask{
+       text-align:justify;
+       margin-left: 20px;
+        border-style: double;
+        border-color:antiquewhite;
+        border-radius:6px;
+        border-width: thick;
+        font-size: 20px;
+}
+</style>
+<script>
+    function contentColor(x) {
+        x.style.backgroundColor = "#D3756B";
+        x.style.color = "#fff";
+    }
+
+    function contentColor2(x) {
+        x.style.backgroundColor = "initial";
+        x.style.color = "black";
+    }
+</script>
+
+@if (ViewBag.Msg != null)
+{
+    <h2 class="alert-info">@ViewBag.Msg</h2>
+}
+
+<p class="titluTask">@Model.Title</p>
+
+
+<div class="flex-container2">
+    <div>Belongs to project: @Model.Project.Title</div>
+    @if (@Model.UserId != null)
+    {
+        <div>Assigned to: @Model.User.Email</div>
+    }
+    else
+    {
+        <div>This task hasn't been assigned</div>
+    }
+</div>
+<br />
+<br />
+
+<p style="font-size: 23px; border-left: 6px solid #ebf3ec; border-radius:6px"><i>Task description:</i></p>
+<p class="contentTask" onmouseover="contentColor(this)" onmouseout="contentColor2(this)">@Model.Content</p>
+<br />
+
+
+<div class="flex-container">
+    <div>Status: @Model.Status.Status_Value</div>
+    <div>Deadline: @Model.Deadline</div>
+    @if (@Model.StartDate != null)
+    {
+        <div>Start Date: @Model.StartDate</div>
+    }
+</div>
+<br />
+
+<a href="/Tasks/EditStatus/@Model.Id" class="btn btn-outline-info m-2">Edit Status</a>
+
+@if (ViewBag.AfisareButoane || ViewBag.EsteAdmin)
+{
+    <a href="/Tasks/Edit/@Model.Id" class="btn btn-outline-info m-2">Edit Task</a>
+    <a href="/Tasks/Delete/@Model.Id" class="btn btn-outline-danger m-2">Delete Task</a>
+}
+<br />
+<br />
+<h4>Comentarii</h4>
+<br />
+
+@* Afisare comentarii impreuna cu butoanele de editare si stergere *@
+
+@foreach (var comm in Model.Comments)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2"></div>
+
+            <div class="col-md-8">
+
+                <div>
+
+                    <p>@comm.Content</p>
+                    <small>@comm.Date</small>
+                    <strong><i class="bi bi-person"></i>@comm.User.UserName</strong>
+
+                </div>
+                <br>
+
+
+                @if (comm.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin)
+                {
+                    <div class="d-flex">
+
+                        <div>
+
+                            <a class="btn btn-outline-info m-2" href="/Comments/Edit/@comm.Id"><i class="bi bi-pencil-square"></i>Edit</a>
+
+                        </div>
+
+                        <div>
+
+                            <form method="post" action="/Comments/Delete/@comm.Id">
+
+                                <button class="btn btn-outline-danger m-2" type="submit"><i class="bi bi-trash"></i>Delete</button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+                }
+
+                <br />
+
+            </div>
+
+            <div class="col-md-2"></div>
+
+        </div>
+
+    </div>
+}
+
+
+@* Afisarea formularului in care se poate adauga un comentariu *@
+
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-md-2"></div>
+
+        <div class="col-md-8">
+
+            <div class="card">
+
+                <form method="post" action="/Tasks/Show/@Model.Id">
+
+                    <div class="card-body">
+
+                        <input type="hidden" name="TaskId" value="@Model.Id" />
+
+                        <label>Comment</label>
+                        <br />
+
+                        <textarea class="form-control" name="Content"></textarea>
+
+                        @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
+
+                        <br /><br />
+
+                        <button class="btn btn-outline-info m-2" type="submit">Add comment</button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-2"></div>
+
+    </div>
+
+</div>
